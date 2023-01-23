@@ -27,5 +27,39 @@ public class Main {
 
         System.out.println(seq.toString());
 
+        SequenceTableau seq2 = new SequenceTableau(1);
+
+        System.out.println(seq2.taille_max);
+
+        seq2.insereTete(1);
+        System.out.println(seq2.toString());
+        seq2.insereTete(2);
+        System.out.println(seq2.toString());
+        seq2.insereTete(3);
+        System.out.println(seq2.toString());
+        seq2.insereTete(4);
+        System.out.println(seq2.toString());
+        seq2.insereTete(5);
+        seq2.insereTete(6);
+        seq2.insereQueue(0);
+        seq2.insereQueue(-1);
+        System.out.println(seq2.toString());
+
+
+        /*
+        System.out.println(seq2.toString());
+        System.out.println(seq2.taille);
+        System.out.print(seq2.extraitTete()+" ");
+        System.out.print(seq2.extraitTete()+" ");
+        System.out.print(seq2.extraitTete()+" ");
+        System.out.print(seq2.extraitTete()+" ");
+        System.out.print(seq2.extraitTete()+" ");
+        System.out.print(seq2.extraitTete()+" ");
+        System.out.print(seq2.extraitTete()+" ");
+        System.out.print(seq2.extraitTete()+" ");
+        System.out.print(seq2.extraitTete()+" ");
+
+        System.out.println(seq2.toString());
+        */
     }
 }

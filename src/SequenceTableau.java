@@ -1,14 +1,14 @@
 public class SequenceTableau {
 
     int[] tableau;
-    private int taille_max;
+    int taille_max;
     private int deb;
-    int nb_elements;
+    int taille;
 
     SequenceTableau(int taille_max){
         tableau = new int[taille_max];
         this.taille_max = taille_max;
-        this.nb_elements = 0;
+        this.taille = 0;
     }
 
     public String toString(){
@@ -19,13 +19,26 @@ public class SequenceTableau {
 
         String res = "[";
 
-        for (int i = deb; i<deb+nb_elements-1; i++){
+        for (int i = deb; i<deb+taille-1; i++){
             res+= tableau[modulo(i)] + ", ";
         }
 
-        res += tableau[modulo(deb+nb_elements)-1] + "]";
+        res += tableau[modulo(deb+taille-1)] + "]";
 
         return res;
+    }
+
+    void redimensionner(){
+        if (taille>=taille_max){
+            //System.out.println("Redimensionner ... (" + taille + "," + taille_max*2 + ")");
+            int[] nouveau_tableau = new int[taille_max*2];
+            for(int i=0; i<taille; i++){
+                nouveau_tableau[i]=tableau[modulo(deb+i)];
+            }
+            taille_max=taille_max*2;
+            deb=0;
+            tableau=nouveau_tableau;
+        }
     }
 
     int atIndex(int index){
@@ -33,14 +46,10 @@ public class SequenceTableau {
     }
 
     void insereTete(int element){
-        if (estVide()){
-            tableau[deb] = element;
-            nb_elements = 1;
-            return;
-        }
+        redimensionner();
         deb = modulo(deb-1);
         tableau[deb] = element;
-        nb_elements += 1;
+        taille += 1;
     }
 
     private int modulo(int index){
@@ -52,19 +61,20 @@ public class SequenceTableau {
     }
 
     void insereQueue(int element){
-        tableau[modulo(deb+nb_elements)] = element;
-        nb_elements += 1;
+        redimensionner();
+        tableau[modulo(deb+taille)] = element;
+        taille += 1;
     }
 
     int extraitTete(){
         int res = tableau[deb];
         deb = modulo(deb+1);
 
-        nb_elements--;
+        taille--;
         return res;
     }
 
     boolean estVide(){
-        return nb_elements == 0;
+        return taille == 0;
     }
 }

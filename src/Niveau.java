@@ -5,7 +5,7 @@ public class Niveau {
     int nb_lignes, nb_colonnes;
 
     Niveau(int ligne, int colonne){
-        grille = new int[50][50];
+        grille = new int[ligne][colonne];
     }
 
     void fixeNom(String s) {
