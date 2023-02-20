@@ -1,3 +1,4 @@
+package Structures;
 /*
  * Sokoban - Encore une nouvelle version (à but pédagogique) du célèbre jeu
  * Copyright (C) 2018 Guillaume Huard
@@ -25,41 +26,30 @@
  *          38401 Saint Martin d'Hères
  */
 
-import java.io.OutputStream;
-import java.io.PrintStream;
+public class FAPTableau<E extends Comparable<E>> extends FAP<E> {
+	SequenceTableau<E> s;
 
-public class RedacteurNiveau {
-	PrintStream sortie;
-
-	RedacteurNiveau(OutputStream out) {
-		sortie = new PrintStream(out);
+	public FAPTableau() {
+		s = new SequenceTableau<>();
+		super.s = s;
 	}
 
-	void ecrisNiveau(Niveau n) {
-		for (int i = 0; i < n.lignes(); i++) {
-			int dernier = 0;
-			for (int j = 0; j < n.colonnes(); j++)
-				if (!n.estVide(i, j))
-					dernier = j;
-			for (int j = 0; j <= dernier; j++)
-				if (n.aMur(i, j))
-					sortie.print('#');
-				else if (n.aBut(i, j))
-					if (n.aPousseur(i, j))
-						sortie.print('+');
-					else if (n.aCaisse(i, j))
-						sortie.print('*');
-					else
-						sortie.print('.');
-				else if (n.aPousseur(i, j))
-					sortie.print('@');
-				else if (n.aCaisse(i, j))
-					sortie.print('$');
-				else
-					sortie.print(' ');
-			sortie.println();
+	@SuppressWarnings("unchecked")
+	@Override
+	public void insere(E element) {
+		s.redimensionne();
+		int courant = (s.debut + s.taille) % s.elements.length;
+		int precedent = courant - 1;
+		if (precedent < 0)
+			precedent = s.elements.length - 1;
+		while ((courant != s.debut) && (element.compareTo((E) s.elements[precedent]) < 0)) {
+			s.elements[courant] = s.elements[precedent];
+			courant = precedent;
+			precedent = courant - 1;
+			if (precedent < 0)
+				precedent = s.elements.length - 1;
 		}
-		if (n.nom() != null)
-			sortie.println("; " + n.nom());
+		s.elements[courant] = element;
+		s.taille++;
 	}
 }

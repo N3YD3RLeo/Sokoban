@@ -25,41 +25,28 @@
  *          38401 Saint Martin d'Hères
  */
 
-import java.io.OutputStream;
-import java.io.PrintStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
 
-public class RedacteurNiveau {
-	PrintStream sortie;
+public class Sokoban {
+	public static void main(String[] args) {
+		InputStream in;
+		try {
+			in = new FileInputStream("res/Niveaux/Original.txt");
 
-	RedacteurNiveau(OutputStream out) {
-		sortie = new PrintStream(out);
-	}
-
-	void ecrisNiveau(Niveau n) {
-		for (int i = 0; i < n.lignes(); i++) {
-			int dernier = 0;
-			for (int j = 0; j < n.colonnes(); j++)
-				if (!n.estVide(i, j))
-					dernier = j;
-			for (int j = 0; j <= dernier; j++)
-				if (n.aMur(i, j))
-					sortie.print('#');
-				else if (n.aBut(i, j))
-					if (n.aPousseur(i, j))
-						sortie.print('+');
-					else if (n.aCaisse(i, j))
-						sortie.print('*');
-					else
-						sortie.print('.');
-				else if (n.aPousseur(i, j))
-					sortie.print('@');
-				else if (n.aCaisse(i, j))
-					sortie.print('$');
-				else
-					sortie.print(' ');
-			sortie.println();
+			LecteurNiveaux l = new LecteurNiveaux(in);
+			RedacteurNiveau r = new RedacteurNiveau(System.out);
+			Niveau n = l.lisProchainNiveau();
+			while (n != null) {
+				System.out.println("Niveau lu :");
+				r.ecrisNiveau(n);
+				n = l.lisProchainNiveau();
+			}
+		} catch (FileNotFoundException e) {
+			System.err.println("ERREUR : impossible de trouver le fichier de niveaux");
+			System.exit(1);
 		}
-		if (n.nom() != null)
-			sortie.println("; " + n.nom());
 	}
 }

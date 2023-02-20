@@ -1,3 +1,4 @@
+package Structures;
 /*
  * Sokoban - Encore une nouvelle version (à but pédagogique) du célèbre jeu
  * Copyright (C) 2018 Guillaume Huard
@@ -25,41 +26,16 @@
  *          38401 Saint Martin d'Hères
  */
 
-import java.io.OutputStream;
-import java.io.PrintStream;
+public abstract class FAP<E extends Comparable<E>> {
+	Sequence<E> s;
 
-public class RedacteurNiveau {
-	PrintStream sortie;
+	abstract void insere(E element);
 
-	RedacteurNiveau(OutputStream out) {
-		sortie = new PrintStream(out);
+	public E extrait() {
+		return s.extraitTete();
 	}
 
-	void ecrisNiveau(Niveau n) {
-		for (int i = 0; i < n.lignes(); i++) {
-			int dernier = 0;
-			for (int j = 0; j < n.colonnes(); j++)
-				if (!n.estVide(i, j))
-					dernier = j;
-			for (int j = 0; j <= dernier; j++)
-				if (n.aMur(i, j))
-					sortie.print('#');
-				else if (n.aBut(i, j))
-					if (n.aPousseur(i, j))
-						sortie.print('+');
-					else if (n.aCaisse(i, j))
-						sortie.print('*');
-					else
-						sortie.print('.');
-				else if (n.aPousseur(i, j))
-					sortie.print('@');
-				else if (n.aCaisse(i, j))
-					sortie.print('$');
-				else
-					sortie.print(' ');
-			sortie.println();
-		}
-		if (n.nom() != null)
-			sortie.println("; " + n.nom());
+	public boolean estVide() {
+		return s.estVide();
 	}
 }

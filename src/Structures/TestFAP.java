@@ -1,3 +1,4 @@
+package Structures;
 /*
  * Sokoban - Encore une nouvelle version (à but pédagogique) du célèbre jeu
  * Copyright (C) 2018 Guillaume Huard
@@ -25,41 +26,47 @@
  *          38401 Saint Martin d'Hères
  */
 
-import java.io.OutputStream;
-import java.io.PrintStream;
+import Structures.FAP;
+import Structures.FAPListe;
+import Structures.FAPTableau;
 
-public class RedacteurNiveau {
-	PrintStream sortie;
+import java.util.Random;
 
-	RedacteurNiveau(OutputStream out) {
-		sortie = new PrintStream(out);
-	}
+public class TestFAP {
+	public static void main(String[] args) {
+		int min = 0;
+		int[] count = new int[100];
+		Random r = new Random();
+		FAP<Integer> f = new FAPListe<>();
+		FAP<Integer> g = new FAPTableau<>();
 
-	void ecrisNiveau(Niveau n) {
-		for (int i = 0; i < n.lignes(); i++) {
-			int dernier = 0;
-			for (int j = 0; j < n.colonnes(); j++)
-				if (!n.estVide(i, j))
-					dernier = j;
-			for (int j = 0; j <= dernier; j++)
-				if (n.aMur(i, j))
-					sortie.print('#');
-				else if (n.aBut(i, j))
-					if (n.aPousseur(i, j))
-						sortie.print('+');
-					else if (n.aCaisse(i, j))
-						sortie.print('*');
-					else
-						sortie.print('.');
-				else if (n.aPousseur(i, j))
-					sortie.print('@');
-				else if (n.aCaisse(i, j))
-					sortie.print('$');
-				else
-					sortie.print(' ');
-			sortie.println();
+		assert (f.estVide());
+		assert (g.estVide());
+		for (int i = 0; i < 10000; i++) {
+			if (r.nextBoolean()) {
+				int val = r.nextInt(count.length);
+				System.out.println("Insertion de " + val + " (Tableau et Liste)");
+				f.insere(val);
+				g.insere(val);
+				assert (!f.estVide());
+				assert (!g.estVide());
+				if (val < min)
+					min = val;
+				count[val]++;
+			} else {
+				if (!f.estVide()) {
+					assert (!g.estVide());
+					int val = f.extrait();
+					int val2 = g.extrait();
+					assert (val == val2);
+					count[val]--;
+					assert (count[val] >= 0);
+					assert (val >= min);
+					if (val > min)
+						min = val;
+					System.out.println("Extraction de " + val + " (Tableau et Liste)");
+				}
+			}
 		}
-		if (n.nom() != null)
-			sortie.println("; " + n.nom());
 	}
 }

@@ -1,76 +1,121 @@
-import java.io.File;
-import java.io.FileNotFoundException;
+/*
+ * Sokoban - Encore une nouvelle version (à but pédagogique) du célèbre jeu
+ * Copyright (C) 2018 Guillaume Huard
+ * 
+ * Ce programme est libre, vous pouvez le redistribuer et/ou le
+ * modifier selon les termes de la Licence Publique Générale GNU publiée par la
+ * Free Software Foundation (version 2 ou bien toute autre version ultérieure
+ * choisie par vous).
+ * 
+ * Ce programme est distribué car potentiellement utile, mais SANS
+ * AUCUNE GARANTIE, ni explicite ni implicite, y compris les garanties de
+ * commercialisation ou d'adaptation dans un but spécifique. Reportez-vous à la
+ * Licence Publique Générale GNU pour plus de détails.
+ * 
+ * Vous devez avoir reçu une copie de la Licence Publique Générale
+ * GNU en même temps que ce programme ; si ce n'est pas le cas, écrivez à la Free
+ * Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307,
+ * États-Unis.
+ * 
+ * Contact:
+ *          Guillaume.Huard@imag.fr
+ *          Laboratoire LIG
+ *          700 avenue centrale
+ *          Domaine universitaire
+ *          38401 Saint Martin d'Hères
+ */
+
+import java.io.InputStream;
 import java.util.Scanner;
 
 public class LecteurNiveaux {
-    Scanner FichierScanner;
-    Niveau niveau;
+	Scanner s;
+	Niveau n;
 
-    LecteurNiveaux(String nom_fichier){
-        File fichier = new File(nom_fichier);
+	LecteurNiveaux(InputStream in) {
+		s = new Scanner(in);
+	}
 
-        try {
-            FichierScanner = new Scanner(fichier);
-        }
-        catch (FileNotFoundException e){
-            System.out.println("Erreur : " + e);
-            System.exit(1);
-        }
-    }
+	String lisLigne() {
+		if (s.hasNextLine()) {
+			String ligne;
+			ligne = s.nextLine();
+			// Nettoyage des séparateurs de fin et commentaires
+			int i;
+			int dernier = -1;
+			boolean commentaire = false;
+			for (i = 0; (i < ligne.length()) && !commentaire; i++) {
+				char c = ligne.charAt(i);
+				if (!Character.isWhitespace(c) && (c != ';')) {
+					dernier = i;
+				}
+				if (c == ';') {
+					commentaire = true;
+				}
+			}
+			// Un commentaire non vide sera pris comme nom de niveau
+			// -> le dernier commentaire non vide sera le nom final
+			if (commentaire) {
+				char c = ' ';
+				while (Character.isWhitespace(c) && (i < ligne.length())) {
+					c = ligne.charAt(i);
+					if (!Character.isWhitespace(c))
+						n.fixeNom(ligne.substring(i));
+					i++;
+				}
+			}
+			return ligne.substring(0, dernier + 1);
+		} else {
+			return null;
+		}
+	}
 
-    int decodeCase(char c){
-        switch (c){
-            case('#'): // Mur
-                return 6;
-            case('@'): // Joeur
-                return 1;
-            case('+'): // Joeur sur un objectif
-                return 2;
-            case('$'): // Boite
-                return 3;
-            case('*'): // Boite sur un objectif
-                return 4;
-            case('.'): // Objectif
-                return 5;
-            case (' '): // Sol
-                return 0;
-        }
-        return -1;
-    }
-
-    Niveau lisProchainNiveau() {
-
-        niveau = new Niveau(100, 100);
-
-        if (!FichierScanner.hasNextLine()) {
-            return null;
-        }
-
-        String ligne = " ";
-        int i = 0;
-        niveau.nb_colonnes = 0;
-        niveau.nb_lignes = 0;
-
-        while(!ligne.isEmpty() && FichierScanner.hasNextLine()){
-            ligne = FichierScanner.nextLine();
-
-            if(ligne.startsWith(";")) { // est commentaire
-                niveau.nom = ligne.substring(2, ligne.length());
-            }
-            else { // est grille
-                for (int j = 0; j < ligne.length(); j++) {
-                    niveau.grille[i][j] = decodeCase(ligne.charAt(j));
-                }
-
-                if (niveau.nb_colonnes < ligne.length()) {
-                    niveau.nb_colonnes = ligne.length();
-                }
-                i++;
-            }
-        }
-
-        niveau.nb_lignes = i-1;
-
-        return niveau;
-    }
+	Niveau lisProchainNiveau() {
+		n = new Niveau();
+		String ligne = "";
+		while (ligne.length() == 0) {
+			ligne = lisLigne();
+			if (ligne == null)
+				return null;
+		}
+		int i = 0;
+		while ((ligne != null) && (ligne.length() > 0)) {
+			for (int j = 0; j < ligne.length(); j++) {
+				char c = ligne.charAt(j);
+				n.videCase(i, j);
+				switch (c) {
+				case ' ':
+					break;
+				case '#':
+					n.ajouteMur(i, j);
+					break;
+				case '@':
+					n.ajoutePousseur(i, j);
+					break;
+				case '+':
+					n.ajoutePousseur(i, j);
+					n.ajouteBut(i, j);
+					break;
+				case '$':
+					n.ajouteCaisse(i, j);
+					break;
+				case '*':
+					n.ajouteCaisse(i, j);
+					n.ajouteBut(i, j);
+					break;
+				case '.':
+					n.ajouteBut(i, j);
+					break;
+				default:
+					System.err.println("Caractère inconnu : " + c);
+				}
+			}
+			ligne = lisLigne();
+			i++;
+		}
+		if (i > 0)
+			return n;
+		else
+			return null;
+	}
 }

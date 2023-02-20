@@ -1,3 +1,4 @@
+package Structures;
 /*
  * Sokoban - Encore une nouvelle version (à but pédagogique) du célèbre jeu
  * Copyright (C) 2018 Guillaume Huard
@@ -25,41 +26,54 @@
  *          38401 Saint Martin d'Hères
  */
 
-import java.io.OutputStream;
-import java.io.PrintStream;
+import java.util.NoSuchElementException;
 
-public class RedacteurNiveau {
-	PrintStream sortie;
+class IterateurSequenceListe<T> implements Iterateur<T> {
 
-	RedacteurNiveau(OutputStream out) {
-		sortie = new PrintStream(out);
+	SequenceListe<T> e;
+	Maillon<T> pprec, prec, courant;
+	boolean last;
+
+	IterateurSequenceListe(SequenceListe<T> e) {
+		this.e = e;
+		pprec = prec = null;
+		courant = e.tete;
+		last = false;
 	}
 
-	void ecrisNiveau(Niveau n) {
-		for (int i = 0; i < n.lignes(); i++) {
-			int dernier = 0;
-			for (int j = 0; j < n.colonnes(); j++)
-				if (!n.estVide(i, j))
-					dernier = j;
-			for (int j = 0; j <= dernier; j++)
-				if (n.aMur(i, j))
-					sortie.print('#');
-				else if (n.aBut(i, j))
-					if (n.aPousseur(i, j))
-						sortie.print('+');
-					else if (n.aCaisse(i, j))
-						sortie.print('*');
-					else
-						sortie.print('.');
-				else if (n.aPousseur(i, j))
-					sortie.print('@');
-				else if (n.aCaisse(i, j))
-					sortie.print('$');
-				else
-					sortie.print(' ');
-			sortie.println();
+	@Override
+	public boolean aProchain() {
+		return courant != null;
+	}
+
+	@Override
+	public T prochain() {
+		if (aProchain()) {
+			pprec = prec;
+			prec = courant;
+			courant = courant.suivant;
+			last = true;
+			return prec.element;
+		} else {
+			throw new NoSuchElementException();
 		}
-		if (n.nom() != null)
-			sortie.println("; " + n.nom());
+	}
+
+	@Override
+	public void supprime() {
+		if (last) {
+			if (pprec == null) {
+				e.tete = courant;
+			} else {
+				pprec.suivant = courant;
+			}
+			if (prec == e.queue) {
+				e.queue = pprec;
+			}
+			prec = pprec;
+			last = false;
+		} else {
+			throw new IllegalStateException();
+		}
 	}
 }
